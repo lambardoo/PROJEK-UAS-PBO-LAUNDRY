@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Laporan - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-bar"></i> Laporan Transaksi</h5>
+
+<!-- Form Filter -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <form action="{{ url_for('laporan.index') }}" method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Awal</label>
+                <input type="date" name="tgl_awal" class="form-control form-control-sm" value="{{ tgl_awal }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tanggal Akhir</label>
+                <input type="date" name="tgl_akhir" class="form-control form-control-sm" value="{{ tgl_akhir }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Semua Status</option>
+                    <option value="Proses"  {% if status=='Proses'  %}selected{% endif %}>Proses</option>
+                    <option value="Selesai" {% if status=='Selesai' %}selected{% endif %}>Selesai</option>
+                    <option value="Diambil" {% if status=='Diambil' %}selected{% endif %}>Diambil</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rekap -->
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-md-4">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary"><i class="fa-solid fa-file-invoice"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ data|length }}</h5>
+                    <small class="text-muted">Jumlah Transaksi</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">Rp {{ "{:,.0f}".format(total_pendapatan) }}</h5>
+                    <small class="text-muted">Total Pendapatan</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning"><i class="fa-solid fa-weight-hanging"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ "{:,.2f}".format(total_berat) }} kg</h5>
+                    <small class="text-muted">Total Berat Cucian</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel -->
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>#</th>
+                        <th>Kode</th>
+                        <th>Pelanggan</th>
+                        <th>Layanan</th>
+                        <th>Berat (kg)</th>
+                        <th>Total</th>
+                        <th>Tgl Masuk</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in data %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ t.kode_transaksi }}</td>
+                        <td>{{ t.nama_pelanggan }}</td>
+                        <td>{{ t.nama_layanan }}</td>
+                        <td>{{ t.berat_kg }}</td>
+                        <td>Rp {{ "{:,.0f}".format(t.total_harga) }}</td>
+                        <td>{{ t.tanggal_masuk.strftime('%d-%m-%Y') }}</td>
+                        <td>
+                            {% if t.status == 'Proses' %}
+                                <span class="badge bg-warning text-dark">Proses</span>
+                            {% elif t.status == 'Selesai' %}
+                                <span class="badge bg-info text-dark">Selesai</span>
+                            {% else %}
+                                <span class="badge bg-success">Diambil</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Tidak ada data</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

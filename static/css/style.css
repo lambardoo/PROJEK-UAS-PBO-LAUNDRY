@@ -1,0 +1,72 @@
+/* Selector -> digunakan untuk menunjuk secara spesifik elemen HTML
+   body{}      -> type selector
+   .container{} -> class selector
+   #id{}        -> id selector
+*/
+
+body {
+    background-color: #f4f7fb;
+    font-family: Arial, sans-serif;
+}
+
+/* ── Auth pages ─────────────────────────────── */
+.auth-bg {
+    background: linear-gradient(135deg, #1565c0, #42a5f5);
+    min-height: 100vh;
+}
+
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+}
+
+/* ── Navbar active link ─────────────────────── */
+.navbar .nav-link.active {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* ── Stat cards (dashboard) ─────────────────── */
+.stat-card {
+    border-radius: 12px;
+    transition: transform .15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* ── Table header ───────────────────────────── */
+.table thead.table-primary th {
+    background-color: #1565c0;
+    color: #fff;
+    border: none;
+}
+
+/* ── General card ───────────────────────────── */
+.card {
+    border-radius: 10px;
+}

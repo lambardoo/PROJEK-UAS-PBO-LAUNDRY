@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Transaksi Baru - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-3"><i class="fa-solid fa-plus"></i> Transaksi Baru</h5>
+
+<div class="card shadow-sm" style="max-width:560px;">
+    <div class="card-body">
+        <form action="{{ url_for('transaksi.tambah') }}" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Pelanggan</label>
+                <select name="pelanggan_id" class="form-select" required>
+                    <option value="">-- Pilih Pelanggan --</option>
+                    {% for p in daftar_pelanggan %}
+                    <option value="{{ p.id }}">{{ p.nama }} - {{ p.no_hp }}</option>
+                    {% endfor %}
+                </select>
+                {% if not daftar_pelanggan %}
+                <small class="text-danger">
+                    Belum ada pelanggan.
+                    <a href="{{ url_for('pelanggan.tambah_page') }}">Tambah pelanggan</a> terlebih dahulu.
+                </small>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Jenis Layanan</label>
+                <select name="layanan_id" class="form-select" required>
+                    <option value="">-- Pilih Layanan --</option>
+                    {% for l in daftar_layanan %}
+                    <option value="{{ l.id }}">
+                        {{ l.nama_layanan }}
+                        (Rp {{ "{:,.0f}".format(l.harga_per_kg) }}/kg &bull; {{ l.estimasi_hari }} hari)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Berat Cucian (kg)</label>
+                <input type="number" step="0.1" min="0.1" name="berat_kg"
+                       class="form-control" placeholder="Contoh: 3.5" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tanggal Masuk</label>
+                <input type="date" name="tanggal_masuk" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-save"></i> Simpan Transaksi
+            </button>
+            <a href="{{ url_for('transaksi.index') }}" class="btn btn-secondary">Batal</a>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Isi tanggal hari ini secara otomatis
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="tanggal_masuk"]').value = today;
+</script>
+{% endblock %}
+
+{% endblock %}

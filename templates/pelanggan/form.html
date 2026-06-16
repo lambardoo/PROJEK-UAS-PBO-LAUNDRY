@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Pelanggan - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-3">
+    <i class="fa-solid fa-user-pen"></i> {{ action }} Data Pelanggan
+</h5>
+
+<div class="card shadow-sm" style="max-width:500px;">
+    <div class="card-body">
+        <form action="{{ url_for('pelanggan.edit', id=data.id) if data else url_for('pelanggan.tambah') }}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Nama Pelanggan</label>
+                <input type="text" name="nama" class="form-control"
+                       value="{{ data.nama if data else '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">No. HP</label>
+                <input type="text" name="no_hp" class="form-control"
+                       value="{{ data.no_hp if data else '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Alamat</label>
+                <textarea name="alamat" class="form-control" rows="3">{{ data.alamat if data else '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-save"></i> Simpan
+            </button>
+            <a href="{{ url_for('pelanggan.index') }}" class="btn btn-secondary">Batal</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

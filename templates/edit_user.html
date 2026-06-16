@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Edit User - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-3"><i class="fa-solid fa-user-pen"></i> Edit User</h5>
+
+<div class="card shadow-sm" style="max-width:500px;">
+    <div class="card-body">
+        <form action="{{ url_for('auth.edit_user', id=user.id) }}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="text" class="form-control" value="{{ user.email }}" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" class="form-control" value="{{ user.nama_lengkap }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                    <option value="admin"  {% if user.role=='admin'  %}selected{% endif %}>Admin</option>
+                    <option value="kasir" {% if user.role=='kasir' %}selected{% endif %}>Kasir</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password Baru <small class="text-muted">(kosongkan jika tidak diubah)</small></label>
+                <input type="password" name="password" class="form-control" placeholder="Password baru">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-save"></i> Simpan
+            </button>
+            <a href="{{ url_for('auth.users_page') }}" class="btn btn-secondary">Batal</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

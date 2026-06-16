@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Data Transaksi - SI Laundry{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fa-solid fa-cart-shopping"></i> Data Transaksi</h5>
+    <a href="{{ url_for('transaksi.tambah_page') }}" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-plus"></i> Transaksi Baru
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Kode</th>
+                        <th>Pelanggan</th>
+                        <th>Layanan</th>
+                        <th>Berat (kg)</th>
+                        <th>Total</th>
+                        <th>Tgl Masuk</th>
+                        <th>Estimasi Selesai</th>
+                        <th>Status</th>
+                        <th>Kasir</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in data %}
+                    <tr>
+                        <td>{{ t.kode_transaksi }}</td>
+                        <td>{{ t.nama_pelanggan }}</td>
+                        <td>{{ t.nama_layanan }}</td>
+                        <td>{{ t.berat_kg }}</td>
+                        <td>Rp {{ "{:,.0f}".format(t.total_harga) }}</td>
+                        <td>{{ t.tanggal_masuk.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ t.tanggal_estimasi.strftime('%d-%m-%Y') }}</td>
+                        <td>
+                            {% if t.status == 'Proses' %}
+                                <span class="badge bg-warning text-dark">Proses</span>
+                            {% elif t.status == 'Selesai' %}
+                                <span class="badge bg-info text-dark">Selesai</span>
+                            {% else %}
+                                <span class="badge bg-success">Diambil</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.nama_kasir }}</td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown">
+                                    <i class="fa-solid fa-gear"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('transaksi.detail', id=t.id) }}">
+                                            <i class="fa-solid fa-eye"></i> Detail
+                                        </a>
+                                    </li>
+                                    {% if t.status == 'Proses' %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('transaksi.ubah_status', id=t.id, status='Selesai') }}">
+                                            <i class="fa-solid fa-check"></i> Tandai Selesai
+                                        </a>
+                                    </li>
+                                    {% elif t.status == 'Selesai' %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('transaksi.ubah_status', id=t.id, status='Diambil') }}">
+                                            <i class="fa-solid fa-box-open"></i> Tandai Diambil
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           href="{{ url_for('transaksi.hapus', id=t.id) }}"
+                                           onclick="return confirm('Yakin hapus transaksi ini?')">
+                                            <i class="fa-solid fa-trash"></i> Hapus
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">Belum ada transaksi</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

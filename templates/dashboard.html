@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-4"><i class="fa-solid fa-gauge"></i> Dashboard</h5>
+
+<!-- Baris 1: Statistik utama -->
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-primary"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_pelanggan }}</h5>
+                    <small class="text-muted">Total Pelanggan</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-success"><i class="fa-solid fa-list-check"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_layanan }}</h5>
+                    <small class="text-muted">Jenis Layanan</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-warning"><i class="fa-solid fa-cart-shopping"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_transaksi }}</h5>
+                    <small class="text-muted">Total Transaksi</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-danger"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">Rp {{ "{:,.0f}".format(pendapatan_bulan_ini) }}</h5>
+                    <small class="text-muted">Pendapatan Bulan Ini</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Baris 2: Statistik transaksi -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon bg-info"><i class="fa-solid fa-calendar-day"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">Rp {{ "{:,.0f}".format(pendapatan_hari_ini) }}</h5>
+                    <small class="text-muted">Pendapatan Hari Ini</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#f39c12;"><i class="fa-solid fa-spinner"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_proses }}</h5>
+                    <small class="text-muted">Sedang Diproses</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#0dcaf0;"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_selesai }}</h5>
+                    <small class="text-muted">Selesai (belum diambil)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#198754;"><i class="fa-solid fa-box-open"></i></div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ total_diambil }}</h5>
+                    <small class="text-muted">Sudah Diambil</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel transaksi terbaru -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-bold">
+        <i class="fa-solid fa-clock-rotate-left"></i> Transaksi Terbaru
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Kode</th>
+                        <th>Pelanggan</th>
+                        <th>Layanan</th>
+                        <th>Berat (kg)</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Tgl Masuk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transaksi_terbaru %}
+                    <tr>
+                        <td>{{ t.kode_transaksi }}</td>
+                        <td>{{ t.nama_pelanggan }}</td>
+                        <td>{{ t.nama_layanan }}</td>
+                        <td>{{ t.berat_kg }}</td>
+                        <td>Rp {{ "{:,.0f}".format(t.total_harga) }}</td>
+                        <td>
+                            {% if t.status == 'Proses' %}
+                                <span class="badge bg-warning text-dark">Proses</span>
+                            {% elif t.status == 'Selesai' %}
+                                <span class="badge bg-info text-dark">Selesai</span>
+                            {% else %}
+                                <span class="badge bg-success">Diambil</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.tanggal_masuk.strftime('%d-%m-%Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Belum ada transaksi</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

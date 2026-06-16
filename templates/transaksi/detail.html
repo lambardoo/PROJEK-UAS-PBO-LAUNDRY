@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Detail Transaksi - SI Laundry{% endblock %}
+{% block content %}
+
+<h5 class="fw-bold mb-3"><i class="fa-solid fa-receipt"></i> Detail Transaksi</h5>
+
+<div class="card shadow-sm" style="max-width:520px;">
+    <div class="card-body">
+        <div class="text-center mb-3">
+            <h6 class="fw-bold">Laundry Bersih</h6>
+            <small class="text-muted">Bukti Penerimaan Cucian</small>
+        </div>
+        <hr>
+
+        <table class="table table-borderless mb-0">
+            <tr>
+                <td class="text-muted" width="50%">Kode Transaksi</td>
+                <td class="fw-bold text-end">{{ data.kode_transaksi }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Nama Pelanggan</td>
+                <td class="text-end">{{ data.nama_pelanggan }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">No. HP</td>
+                <td class="text-end">{{ data.no_hp }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Alamat</td>
+                <td class="text-end">{{ data.alamat }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Jenis Layanan</td>
+                <td class="text-end">{{ data.nama_layanan }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Harga / Kg</td>
+                <td class="text-end">Rp {{ "{:,.0f}".format(data.harga_per_kg) }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Berat Cucian</td>
+                <td class="text-end">{{ data.berat_kg }} kg</td>
+            </tr>
+            <tr class="table-light">
+                <td class="fw-bold">Total Harga</td>
+                <td class="fw-bold text-primary text-end">Rp {{ "{:,.0f}".format(data.total_harga) }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Tanggal Masuk</td>
+                <td class="text-end">{{ data.tanggal_masuk.strftime('%d-%m-%Y') }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Estimasi Selesai</td>
+                <td class="text-end">{{ data.tanggal_estimasi.strftime('%d-%m-%Y') }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">Status</td>
+                <td class="text-end">
+                    {% if data.status == 'Proses' %}
+                        <span class="badge bg-warning text-dark">Proses</span>
+                    {% elif data.status == 'Selesai' %}
+                        <span class="badge bg-info text-dark">Selesai</span>
+                    {% else %}
+                        <span class="badge bg-success">Diambil</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <hr>
+        <a href="{{ url_for('transaksi.index') }}" class="btn btn-secondary w-100">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+</div>
+
+{% endblock %}
