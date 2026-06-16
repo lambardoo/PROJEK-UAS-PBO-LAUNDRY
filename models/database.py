@@ -1,6 +1,3 @@
-# Instalasi package:
-# pip install flask mysql-connector-python werkzeug
-
 import mysql.connector
 
 def get_db_connection():
