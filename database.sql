@@ -2,7 +2,7 @@
 CREATE DATABASE IF NOT EXISTS db_laundry;
 USE db_laundry;
 
--- Tabel users (autentikasi)
+-- Tabel users
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama_lengkap VARCHAR(100) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel pelanggan (data master 1)
+-- Tabel pelanggan 
 CREATE TABLE IF NOT EXISTS pelanggan (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama VARCHAR(100) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS pelanggan (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel layanan (data master 2)
+-- Tabel layanan 
 CREATE TABLE IF NOT EXISTS layanan (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama_layanan VARCHAR(100) NOT NULL,
@@ -61,7 +61,7 @@ INSERT INTO layanan (nama_layanan, harga_per_kg, estimasi_hari) VALUES
 ('Cuci Cepetan Dikit', 9000, 2),
 ('Cuci Selimut / Bed Cover', 15000, 2);
 
--- Data awal: pelanggan contoh
+-- Data awal: pelanggan
 INSERT INTO pelanggan (nama, no_hp, alamat) VALUES
 ('Budi Kemaren', '081234567890', 'Jl. Merdeka No. 10'),
 ('Siti Abadi',  '081298765432', 'Jl. Diponegoro No. 5');
