@@ -1,7 +1,7 @@
 import mysql.connector
 
 def get_db_connection():
-    try:  # Exception Handling
+    try: 
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
