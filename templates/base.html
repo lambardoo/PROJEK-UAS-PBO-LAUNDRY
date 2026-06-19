@@ -31,11 +31,13 @@
                         <i class="fa-solid fa-users"></i> Pelanggan
                     </a>
                 </li>
+               {% if session.role == 'admin' %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('layanan.index') }}">
-                        <i class="fa-solid fa-list-check"></i> Layanan
-                    </a>
+                        <i class="fa-solid fa-soap"></i> Layanan
+                     </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('transaksi.index') }}">
                         <i class="fa-solid fa-cart-shopping"></i> Transaksi
@@ -46,11 +48,13 @@
                         <i class="fa-solid fa-chart-bar"></i> Laporan
                     </a>
                 </li>
+                {% if session.role == 'admin' %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.users_page') }}">
-                        <i class="fa-solid fa-user-gear"></i> Manajemen User
+                        <i class="fa-solid fa-icon-name"></i> Manajemen User
                     </a>
                 </li>
+                {% endif %}
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
