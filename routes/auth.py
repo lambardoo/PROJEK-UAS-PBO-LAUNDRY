@@ -18,9 +18,18 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get('role') != 'admin':
+            flash('Akses ditolak. Hanya Admin yang diizinkan.', 'danger')
+            return redirect(url_for('dashboard.index'))
+        return f(*args, **kwargs)
+    return decorated
+
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: AUTH (login, register, logout, manajemen user)
+# (login, register, logout, manajemen user)
 # ════════════════════════════════════════════════════════════════════════
 auth_bp = Blueprint('auth', __name__)
 
@@ -109,6 +118,7 @@ def logout():
 
 @auth_bp.route('/users')
 @login_required
+@admin_required
 def users_page():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
@@ -124,6 +134,7 @@ def users_page():
 
 @auth_bp.route('/users/edit/<int:id>')
 @login_required
+@admin_required
 def edit_user_page(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
@@ -142,6 +153,7 @@ def edit_user_page(id):
 
 @auth_bp.route('/users/edit/<int:id>', methods=['POST'])
 @login_required
+@admin_required
 def edit_user(id):
     var_nama = request.form.get('nama_lengkap')
     var_role = request.form.get('role')
@@ -177,6 +189,7 @@ def edit_user(id):
 
 @auth_bp.route('/users/hapus/<int:id>')
 @login_required
+@admin_required
 def hapus_user(id):
     if id == session.get('user_id'):
         flash('Tidak dapat menghapus akun yang sedang digunakan.', 'danger')
@@ -197,7 +210,7 @@ def hapus_user(id):
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: DASHBOARD
+# DASHBOARD
 # ════════════════════════════════════════════════════════════════════════
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -271,7 +284,7 @@ def index():
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: PELANGGAN (data master 1)
+# PELANGGAN
 # ════════════════════════════════════════════════════════════════════════
 pelanggan_bp = Blueprint('pelanggan', __name__)
 
@@ -395,13 +408,14 @@ def hapus(id):
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: LAYANAN (data master 2)
+# LAYANAN 
 # ════════════════════════════════════════════════════════════════════════
 layanan_bp = Blueprint('layanan', __name__)
 
 
 @layanan_bp.route('/layanan')
 @login_required
+@admin_required
 def index():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
@@ -423,6 +437,7 @@ def tambah_page():
 
 @layanan_bp.route('/layanan/tambah', methods=['POST'])
 @login_required
+@admin_required
 def tambah():
     var_nama  = request.form.get('nama_layanan')
     var_harga = request.form.get('harga_per_kg')
@@ -449,6 +464,7 @@ def tambah():
 
 @layanan_bp.route('/layanan/edit/<int:id>')
 @login_required
+@admin_required
 def edit_page(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
@@ -511,7 +527,7 @@ def hapus(id):
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: TRANSAKSI
+# TRANSAKSI
 # ════════════════════════════════════════════════════════════════════════
 transaksi_bp = Blueprint('transaksi', __name__)
 
@@ -689,7 +705,7 @@ def hapus(id):
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  BLUEPRINT: LAPORAN
+# LAPORAN
 # ════════════════════════════════════════════════════════════════════════
 laporan_bp = Blueprint('laporan', __name__)
 
