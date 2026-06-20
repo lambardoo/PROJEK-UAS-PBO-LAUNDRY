@@ -7,6 +7,100 @@ from models.database import get_db_connection
 
 
 # ════════════════════════════════════════════════════════════════════════
+#  IMPLEMENTASI OOP
+#  Konsep: Class & Object, Constructor, Method,
+#          Encapsulation, Inheritance, Polymorphism
+# ════════════════════════════════════════════════════════════════════════
+
+class BaseModel:
+    """Class induk — Inheritance: semua model mewarisi class ini."""
+    def __init__(self):
+        self._db     = get_db_connection()
+        self._cursor = self._db.cursor(dictionary=True)
+
+    def _close(self):
+        self._cursor.close()
+        self._db.close()
+
+    def to_dict(self):
+        """Polymorphism: method ini di-override tiap subclass."""
+        return {}
+
+
+class Pelanggan(BaseModel):
+    """Encapsulation: atribut disimpan private, diakses via property."""
+    def __init__(self, nama='', no_hp='', alamat=''):
+        super().__init__()          # Constructor memanggil parent
+        self.__nama   = nama
+        self.__no_hp  = no_hp
+        self.__alamat = alamat
+
+    @property
+    def nama(self):   return self.__nama
+    @property
+    def no_hp(self):  return self.__no_hp
+    @property
+    def alamat(self): return self.__alamat
+
+    def to_dict(self):              # Polymorphism: override to_dict
+        return {'nama': self.__nama, 'no_hp': self.__no_hp, 'alamat': self.__alamat}
+
+    def count(self):                # Method: hitung total pelanggan
+        try:
+            self._cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
+            return self._cursor.fetchone()['total']
+        finally:
+            self._close()
+
+
+class Layanan(BaseModel):           # Inheritance dari BaseModel
+    def __init__(self, nama_layanan='', harga_per_kg=0, estimasi_hari=1):
+        super().__init__()
+        self.__nama_layanan  = nama_layanan
+        self.__harga_per_kg  = float(harga_per_kg) if harga_per_kg else 0
+        self.__estimasi_hari = int(estimasi_hari)   if estimasi_hari else 1
+
+    def to_dict(self):              # Polymorphism: override to_dict
+        return {'nama_layanan': self.__nama_layanan,
+                'harga_per_kg': self.__harga_per_kg,
+                'estimasi_hari': self.__estimasi_hari}
+
+    def hitung_harga(self, berat_kg):
+        """Method khusus: hitung total harga berdasarkan berat."""
+        return self.__harga_per_kg * float(berat_kg)
+
+    def count(self):
+        try:
+            self._cursor.execute("SELECT COUNT(*) AS total FROM layanan")
+            return self._cursor.fetchone()['total']
+        finally:
+            self._close()
+
+
+class Transaksi(BaseModel):         # Inheritance dari BaseModel
+    def __init__(self, pelanggan_id=None, layanan_id=None,
+                 berat_kg=0, tanggal_masuk='', user_id=None):
+        super().__init__()
+        self.__pelanggan_id  = pelanggan_id
+        self.__layanan_id    = layanan_id
+        self.__berat_kg      = float(berat_kg) if berat_kg else 0
+        self.__tanggal_masuk = tanggal_masuk
+        self.__user_id       = user_id
+
+    def to_dict(self):              # Polymorphism: override to_dict
+        return {'pelanggan_id': self.__pelanggan_id,
+                'layanan_id'  : self.__layanan_id,
+                'berat_kg'    : self.__berat_kg}
+
+    def count(self):
+        try:
+            self._cursor.execute("SELECT COUNT(*) AS total FROM transaksi")
+            return self._cursor.fetchone()['total']
+        finally:
+            self._close()
+
+
+# ════════════════════════════════════════════════════════════════════════
 #  DECORATOR: wajib login
 # ════════════════════════════════════════════════════════════════════════
 def login_required(f):
@@ -29,7 +123,7 @@ def admin_required(f):
 
 
 # ════════════════════════════════════════════════════════════════════════
-# (login, register, logout, manajemen user)
+# AUTH (login, register, logout, manajemen user)
 # ════════════════════════════════════════════════════════════════════════
 auth_bp = Blueprint('auth', __name__)
 
@@ -79,8 +173,8 @@ def register_page():
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    var_nama     = request.form.get('nama')
-    var_email    = request.form.get('email')
+    var_nama    = request.form.get('nama')
+    var_email   = request.form.get('email')
     var_password = request.form.get('password')
     var_konfirm  = request.form.get('konfirmasi_password')
 
@@ -408,7 +502,7 @@ def hapus(id):
 
 
 # ════════════════════════════════════════════════════════════════════════
-# LAYANAN 
+# LAYANAN
 # ════════════════════════════════════════════════════════════════════════
 layanan_bp = Blueprint('layanan', __name__)
 
