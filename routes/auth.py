@@ -8,26 +8,56 @@ from models.database import get_db_connection
 
 # ════════════════════════════════════════════════════════════════════════
 #  IMPLEMENTASI OOP :
-#  Class & Object, Constructor, Method, Encapsulation, Inheritance, Polymorphism
+#  Class & Object, Constructor, Method, Encapsulation,Inheritance, Polymorphism 
 # ════════════════════════════════════════════════════════════════════════
 
 class BaseModel:
-    def __init__(self):
-        self._db     = get_db_connection()
-        self._cursor = self._db.cursor(dictionary=True)
+    table_name = None 
+    def __init__(self, id=None):
+        self._id = id 
 
-    def _close(self):
-        self._cursor.close()
-        self._db.close()
+    @property
+    def id(self):
+        return self._id
 
     def to_dict(self):
-        return {}
+        return {'id': self._id}
+
+    def info(self):
+        return f"{self.__class__.__name__} #{self._id}"
+
+    @classmethod
+    def count(cls):
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute(f"SELECT COUNT(*) AS total FROM {cls.table_name}")
+            return cursor.fetchone()['total']
+        finally:
+            cursor.close()
+            db.close()
+
+    @classmethod
+    def delete(cls, id):
+        db = get_db_connection()
+        cursor = db.cursor()
+        try:
+            cursor.execute(f"DELETE FROM {cls.table_name} WHERE id = %s", (id,))
+            db.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            cursor.close()
+            db.close()
 
 
 class Pelanggan(BaseModel):
-    def __init__(self, nama='', no_hp='', alamat=''):
-        super().__init__()          
-        self.__nama   = nama
+    table_name = 'pelanggan'
+
+    def __init__(self, nama='', no_hp='', alamat='', id=None):
+        super().__init__(id)            
+        self.__nama   = nama            
         self.__no_hp  = no_hp
         self.__alamat = alamat
 
@@ -38,61 +68,197 @@ class Pelanggan(BaseModel):
     @property
     def alamat(self): return self.__alamat
 
-    def to_dict(self):             
-        return {'nama': self.__nama, 'no_hp': self.__no_hp, 'alamat': self.__alamat}
+    def to_dict(self):                 
+        return {'id': self._id, 'nama': self.__nama,
+                'no_hp': self.__no_hp, 'alamat': self.__alamat}
 
-    def count(self):              
+    def info(self):                     
+        return f"Pelanggan: {self.__nama} ({self.__no_hp})"
+
+    def save(self):
+        db = get_db_connection()
+        cursor = db.cursor()
         try:
-            self._cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
-            return self._cursor.fetchone()['total']
+            cursor.execute(
+                "INSERT INTO pelanggan (nama, no_hp, alamat) VALUES (%s, %s, %s)",
+                (self.__nama, self.__no_hp, self.__alamat)
+            )
+            db.commit()
+            self._id = cursor.lastrowid
+            return True
+        except Exception:
+            return False
         finally:
-            self._close()
+            cursor.close()
+            db.close()
+
+    def update(self):
+        db = get_db_connection()
+        cursor = db.cursor()
+        try:
+            cursor.execute(
+                "UPDATE pelanggan SET nama=%s, no_hp=%s, alamat=%s WHERE id=%s",
+                (self.__nama, self.__no_hp, self.__alamat, self._id)
+            )
+            db.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            cursor.close()
+            db.close()
 
 
-class Layanan(BaseModel):           
-    def __init__(self, nama_layanan='', harga_per_kg=0, estimasi_hari=1):
-        super().__init__()
+class Layanan(BaseModel):
+    table_name = 'layanan'
+
+    def __init__(self, nama_layanan='', harga_per_kg=0, estimasi_hari=1, id=None):
+        super().__init__(id)
         self.__nama_layanan  = nama_layanan
         self.__harga_per_kg  = float(harga_per_kg) if harga_per_kg else 0
         self.__estimasi_hari = int(estimasi_hari)   if estimasi_hari else 1
 
-    def to_dict(self):             
-        return {'nama_layanan': self.__nama_layanan,
+    @property
+    def nama_layanan(self):  return self.__nama_layanan
+    @property
+    def harga_per_kg(self):  return self.__harga_per_kg
+    @property
+    def estimasi_hari(self): return self.__estimasi_hari
+
+    def to_dict(self):                 
+        return {'id': self._id,
+                'nama_layanan': self.__nama_layanan,
                 'harga_per_kg': self.__harga_per_kg,
                 'estimasi_hari': self.__estimasi_hari}
+
+    def info(self):                     
+        return f"Layanan: {self.__nama_layanan} - Rp{self.__harga_per_kg:,.0f}/kg"
 
     def hitung_harga(self, berat_kg):
         return self.__harga_per_kg * float(berat_kg)
 
-    def count(self):
+    def hitung_estimasi_selesai(self, tanggal_masuk):
+        return tanggal_masuk + timedelta(days=self.__estimasi_hari)
+
+    def save(self):
+        db = get_db_connection()
+        cursor = db.cursor()
         try:
-            self._cursor.execute("SELECT COUNT(*) AS total FROM layanan")
-            return self._cursor.fetchone()['total']
+            cursor.execute(
+                "INSERT INTO layanan (nama_layanan, harga_per_kg, estimasi_hari) VALUES (%s, %s, %s)",
+                (self.__nama_layanan, self.__harga_per_kg, self.__estimasi_hari)
+            )
+            db.commit()
+            self._id = cursor.lastrowid
+            return True
+        except Exception:
+            return False
         finally:
-            self._close()
+            cursor.close()
+            db.close()
+
+    def update(self):
+        db = get_db_connection()
+        cursor = db.cursor()
+        try:
+            cursor.execute(
+                "UPDATE layanan SET nama_layanan=%s, harga_per_kg=%s, estimasi_hari=%s WHERE id=%s",
+                (self.__nama_layanan, self.__harga_per_kg, self.__estimasi_hari, self._id)
+            )
+            db.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            cursor.close()
+            db.close()
+
+    @classmethod
+    def get_by_id(cls, id):
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM layanan WHERE id = %s", (id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return cls(nama_layanan=row['nama_layanan'],
+                        harga_per_kg=row['harga_per_kg'],
+                        estimasi_hari=row['estimasi_hari'],
+                        id=row['id'])
+        finally:
+            cursor.close()
+            db.close()
 
 
-class Transaksi(BaseModel):        
-    def __init__(self, pelanggan_id=None, layanan_id=None,
-                 berat_kg=0, tanggal_masuk='', user_id=None):
-        super().__init__()
-        self.__pelanggan_id  = pelanggan_id
-        self.__layanan_id    = layanan_id
-        self.__berat_kg      = float(berat_kg) if berat_kg else 0
-        self.__tanggal_masuk = tanggal_masuk
-        self.__user_id       = user_id
+class Transaksi(BaseModel):
+    table_name = 'transaksi'
 
-    def to_dict(self):              # Polymorphism: override to_dict
-        return {'pelanggan_id': self.__pelanggan_id,
+    def __init__(self, pelanggan_id=None, layanan_id=None, berat_kg=0,
+                 total_harga=0, tanggal_masuk='', tanggal_estimasi='',
+                 user_id=None, kode_transaksi='', id=None):
+        super().__init__(id)
+        self.__pelanggan_id     = pelanggan_id
+        self.__layanan_id       = layanan_id
+        self.__berat_kg         = float(berat_kg) if berat_kg else 0
+        self.__total_harga      = float(total_harga) if total_harga else 0
+        self.__tanggal_masuk    = tanggal_masuk
+        self.__tanggal_estimasi = tanggal_estimasi
+        self.__user_id          = user_id
+        self.__kode_transaksi   = kode_transaksi
+
+    @property
+    def kode_transaksi(self): return self.__kode_transaksi
+    @property
+    def total_harga(self):    return self.__total_harga
+
+    def to_dict(self):               
+        return {'id': self._id,
+                'kode_transaksi': self.__kode_transaksi,
+                'pelanggan_id': self.__pelanggan_id,
                 'layanan_id'  : self.__layanan_id,
-                'berat_kg'    : self.__berat_kg}
+                'berat_kg'    : self.__berat_kg,
+                'total_harga' : self.__total_harga}
 
-    def count(self):
+    def info(self):                  
+        return f"Transaksi {self.__kode_transaksi}: {self.__berat_kg}kg - Rp{self.__total_harga:,.0f}"
+
+    def save(self):
+        db = get_db_connection()
+        cursor = db.cursor()
         try:
-            self._cursor.execute("SELECT COUNT(*) AS total FROM transaksi")
-            return self._cursor.fetchone()['total']
+            cursor.execute("""
+                INSERT INTO transaksi
+                    (kode_transaksi, pelanggan_id, layanan_id, berat_kg,
+                     total_harga, status, tanggal_masuk, tanggal_estimasi, user_id)
+                VALUES (%s, %s, %s, %s, %s, 'Proses', %s, %s, %s)
+            """, (self.__kode_transaksi, self.__pelanggan_id, self.__layanan_id,
+                  self.__berat_kg, self.__total_harga, self.__tanggal_masuk,
+                  self.__tanggal_estimasi, self.__user_id))
+            db.commit()
+            self._id = cursor.lastrowid
+            return True
+        except Exception:
+            return False
         finally:
-            self._close()
+            cursor.close()
+            db.close()
+
+    @staticmethod
+    def generate_kode():
+        db = get_db_connection()
+        cursor = db.cursor(dictionary=True)
+        try:
+            hari_ini = datetime.now().strftime('%Y%m%d')
+            cursor.execute(
+                "SELECT COUNT(*) AS total FROM transaksi WHERE kode_transaksi LIKE %s",
+                (f'TRX-{hari_ini}-%',)
+            )
+            urutan = cursor.fetchone()['total'] + 1
+            return f'TRX-{hari_ini}-{urutan:04d}'
+        finally:
+            cursor.close()
+            db.close()
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -311,14 +477,11 @@ def index():
     cursor = db.cursor(dictionary=True)
 
     try:
-        cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
-        total_pelanggan = cursor.fetchone()['total']
-
-        cursor.execute("SELECT COUNT(*) AS total FROM layanan")
-        total_layanan = cursor.fetchone()['total']
-
-        cursor.execute("SELECT COUNT(*) AS total FROM transaksi")
-        total_transaksi = cursor.fetchone()['total']
+        # Menggunakan method count() dari class OOP (BaseModel.count, di-inherit
+        # oleh Pelanggan, Layanan, Transaksi) alih-alih query manual berulang.
+        total_pelanggan  = Pelanggan.count()
+        total_layanan    = Layanan.count()
+        total_transaksi  = Transaksi.count()
 
         cursor.execute("SELECT COUNT(*) AS total FROM transaksi WHERE status='Proses'")
         total_proses = cursor.fetchone()['total']
@@ -354,6 +517,21 @@ def index():
         """)
         transaksi_terbaru = cursor.fetchall()
 
+        # ── Demonstrasi POLYMORPHISM ──────────────────────────────────────
+        # Tiga object dari class berbeda (semua turunan BaseModel) disimpan
+        # dalam satu list, lalu dipanggil method info() yang sama namanya
+        # tapi hasilnya berbeda-beda tergantung class objectnya masing-masing.
+        objek_terbaru = []
+        if transaksi_terbaru:
+            t = transaksi_terbaru[0]
+            objek_pelanggan = Pelanggan(nama=t['nama_pelanggan'])
+            objek_layanan   = Layanan(nama_layanan=t['nama_layanan'])
+            objek_transaksi = Transaksi(kode_transaksi=t['kode_transaksi'],
+                                         berat_kg=t['berat_kg'],
+                                         total_harga=t['total_harga'])
+            for obj in (objek_pelanggan, objek_layanan, objek_transaksi):
+                objek_terbaru.append(obj.info())   # method sama, output beda (polymorphism)
+
         return render_template(
             'dashboard.html',
             total_pelanggan      = total_pelanggan,
@@ -364,7 +542,8 @@ def index():
             total_diambil        = total_diambil,
             pendapatan_hari_ini  = pendapatan_hari_ini,
             pendapatan_bulan_ini = pendapatan_bulan_ini,
-            transaksi_terbaru    = transaksi_terbaru
+            transaksi_terbaru    = transaksi_terbaru,
+            objek_terbaru        = objek_terbaru
         )
 
     finally:
@@ -414,21 +593,13 @@ def tambah():
     var_hp     = request.form.get('no_hp')
     var_alamat = request.form.get('alamat')
 
-    db     = get_db_connection()
-    cursor = db.cursor()
+    # Membuat object Pelanggan lalu memanggil method save() miliknya sendiri
+    objek_pelanggan = Pelanggan(nama=var_nama, no_hp=var_hp, alamat=var_alamat)
 
-    try:
-        cursor.execute(
-            "INSERT INTO pelanggan (nama, no_hp, alamat) VALUES (%s, %s, %s)",
-            (var_nama, var_hp, var_alamat)
-        )
-        db.commit()
+    if objek_pelanggan.save():
         flash('Data pelanggan berhasil ditambahkan.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal menambahkan data pelanggan.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('pelanggan.index'))
 
@@ -458,21 +629,13 @@ def edit(id):
     var_hp     = request.form.get('no_hp')
     var_alamat = request.form.get('alamat')
 
-    db     = get_db_connection()
-    cursor = db.cursor()
+    # Object Pelanggan dengan id yang sudah ada, lalu panggil method update()
+    objek_pelanggan = Pelanggan(nama=var_nama, no_hp=var_hp, alamat=var_alamat, id=id)
 
-    try:
-        cursor.execute(
-            "UPDATE pelanggan SET nama=%s, no_hp=%s, alamat=%s WHERE id=%s",
-            (var_nama, var_hp, var_alamat, id)
-        )
-        db.commit()
+    if objek_pelanggan.update():
         flash('Data pelanggan berhasil diperbarui.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal memperbarui data pelanggan.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('pelanggan.index'))
 
@@ -480,18 +643,11 @@ def edit(id):
 @pelanggan_bp.route('/pelanggan/hapus/<int:id>')
 @login_required
 def hapus(id):
-    db     = get_db_connection()
-    cursor = db.cursor()
-
-    try:
-        cursor.execute("DELETE FROM pelanggan WHERE id = %s", (id,))
-        db.commit()
+    # Method delete() diwarisi dari BaseModel, dipakai lewat Pelanggan.delete()
+    if Pelanggan.delete(id):
         flash('Data pelanggan berhasil dihapus.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal menghapus. Pelanggan mungkin masih memiliki transaksi.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('pelanggan.index'))
 
@@ -532,21 +688,12 @@ def tambah():
     var_harga = request.form.get('harga_per_kg')
     var_hari  = request.form.get('estimasi_hari')
 
-    db     = get_db_connection()
-    cursor = db.cursor()
+    objek_layanan = Layanan(nama_layanan=var_nama, harga_per_kg=var_harga, estimasi_hari=var_hari)
 
-    try:
-        cursor.execute(
-            "INSERT INTO layanan (nama_layanan, harga_per_kg, estimasi_hari) VALUES (%s, %s, %s)",
-            (var_nama, var_harga, var_hari)
-        )
-        db.commit()
+    if objek_layanan.save():
         flash('Data layanan berhasil ditambahkan.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal menambahkan data layanan.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('layanan.index'))
 
@@ -577,21 +724,13 @@ def edit(id):
     var_harga = request.form.get('harga_per_kg')
     var_hari  = request.form.get('estimasi_hari')
 
-    db     = get_db_connection()
-    cursor = db.cursor()
+    objek_layanan = Layanan(nama_layanan=var_nama, harga_per_kg=var_harga,
+                             estimasi_hari=var_hari, id=id)
 
-    try:
-        cursor.execute(
-            "UPDATE layanan SET nama_layanan=%s, harga_per_kg=%s, estimasi_hari=%s WHERE id=%s",
-            (var_nama, var_harga, var_hari, id)
-        )
-        db.commit()
+    if objek_layanan.update():
         flash('Data layanan berhasil diperbarui.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal memperbarui data layanan.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('layanan.index'))
 
@@ -599,18 +738,10 @@ def edit(id):
 @layanan_bp.route('/layanan/hapus/<int:id>')
 @login_required
 def hapus(id):
-    db     = get_db_connection()
-    cursor = db.cursor()
-
-    try:
-        cursor.execute("DELETE FROM layanan WHERE id = %s", (id,))
-        db.commit()
+    if Layanan.delete(id):
         flash('Data layanan berhasil dihapus.', 'success')
-    except Exception as e:
+    else:
         flash('Gagal menghapus. Layanan mungkin masih digunakan dalam transaksi.', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('layanan.index'))
 
@@ -619,24 +750,6 @@ def hapus(id):
 # TRANSAKSI
 # ════════════════════════════════════════════════════════════════════════
 transaksi_bp = Blueprint('transaksi', __name__)
-
-
-def generate_kode():
-    """Generate kode transaksi otomatis: TRX-YYYYMMDD-XXXX"""
-    db     = get_db_connection()
-    cursor = db.cursor(dictionary=True)
-
-    try:
-        hari_ini = datetime.now().strftime('%Y%m%d')
-        cursor.execute(
-            "SELECT COUNT(*) AS total FROM transaksi WHERE kode_transaksi LIKE %s",
-            (f'TRX-{hari_ini}-%',)
-        )
-        urutan = cursor.fetchone()['total'] + 1
-        return f'TRX-{hari_ini}-{urutan:04d}'
-    finally:
-        cursor.close()
-        db.close()
 
 
 @transaksi_bp.route('/transaksi')
@@ -694,37 +807,40 @@ def tambah():
     var_tgl_masuk = request.form.get('tanggal_masuk')
     var_user      = session['user_id']
 
-    db     = get_db_connection()
-    cursor = db.cursor(dictionary=True)
-
     try:
-        cursor.execute("SELECT * FROM layanan WHERE id = %s", (var_layanan,))
-        layanan = cursor.fetchone()
+        # Ambil object Layanan dari database (classmethod get_by_id)
+        objek_layanan = Layanan.get_by_id(var_layanan)
+        if not objek_layanan:
+            flash('Layanan tidak ditemukan.', 'danger')
+            return redirect(url_for('transaksi.tambah_page'))
 
-        total_harga = float(layanan['harga_per_kg']) * var_berat
-
+        # Method milik object Layanan dipakai untuk menghitung harga & estimasi
+        total_harga  = objek_layanan.hitung_harga(var_berat)
         tgl_masuk    = datetime.strptime(var_tgl_masuk, '%Y-%m-%d')
-        tgl_estimasi = tgl_masuk + timedelta(days=int(layanan['estimasi_hari']))
+        tgl_estimasi = objek_layanan.hitung_estimasi_selesai(tgl_masuk)
 
-        kode = generate_kode()
+        # Static method milik class Transaksi untuk generate kode otomatis
+        kode = Transaksi.generate_kode()
 
-        cursor2 = db.cursor()
-        cursor2.execute("""
-            INSERT INTO transaksi
-                (kode_transaksi, pelanggan_id, layanan_id, berat_kg,
-                 total_harga, status, tanggal_masuk, tanggal_estimasi, user_id)
-            VALUES (%s, %s, %s, %s, %s, 'Proses', %s, %s, %s)
-        """, (kode, var_pelanggan, var_layanan, var_berat,
-              total_harga, var_tgl_masuk, tgl_estimasi.strftime('%Y-%m-%d'), var_user))
-        db.commit()
-        cursor2.close()
+        # Membuat object Transaksi lalu menyimpannya lewat method save() miliknya
+        objek_transaksi = Transaksi(
+            pelanggan_id     = var_pelanggan,
+            layanan_id       = var_layanan,
+            berat_kg         = var_berat,
+            total_harga      = total_harga,
+            tanggal_masuk    = var_tgl_masuk,
+            tanggal_estimasi = tgl_estimasi.strftime('%Y-%m-%d'),
+            user_id          = var_user,
+            kode_transaksi   = kode
+        )
 
-        flash(f'Transaksi {kode} berhasil dibuat.', 'success')
+        if objek_transaksi.save():
+            flash(f'Transaksi {objek_transaksi.kode_transaksi} berhasil dibuat.', 'success')
+        else:
+            flash('Gagal membuat transaksi.', 'danger')
+
     except Exception as e:
         flash(f'Gagal membuat transaksi: {e}', 'danger')
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for('transaksi.index'))
 
@@ -779,16 +895,10 @@ def ubah_status(id, status):
 @transaksi_bp.route('/transaksi/hapus/<int:id>')
 @login_required
 def hapus(id):
-    db     = get_db_connection()
-    cursor = db.cursor()
-
-    try:
-        cursor.execute("DELETE FROM transaksi WHERE id = %s", (id,))
-        db.commit()
+    if Transaksi.delete(id):
         flash('Transaksi berhasil dihapus.', 'success')
-    finally:
-        cursor.close()
-        db.close()
+    else:
+        flash('Gagal menghapus transaksi.', 'danger')
 
     return redirect(url_for('transaksi.index'))
 
