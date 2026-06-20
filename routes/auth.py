@@ -7,13 +7,11 @@ from models.database import get_db_connection
 
 
 # ════════════════════════════════════════════════════════════════════════
-#  IMPLEMENTASI OOP
-#  Konsep: Class & Object, Constructor, Method,
-#          Encapsulation, Inheritance, Polymorphism
+#  IMPLEMENTASI OOP :
+#  Class & Object, Constructor, Method, Encapsulation, Inheritance, Polymorphism
 # ════════════════════════════════════════════════════════════════════════
 
 class BaseModel:
-    """Class induk — Inheritance: semua model mewarisi class ini."""
     def __init__(self):
         self._db     = get_db_connection()
         self._cursor = self._db.cursor(dictionary=True)
@@ -23,14 +21,12 @@ class BaseModel:
         self._db.close()
 
     def to_dict(self):
-        """Polymorphism: method ini di-override tiap subclass."""
         return {}
 
 
 class Pelanggan(BaseModel):
-    """Encapsulation: atribut disimpan private, diakses via property."""
     def __init__(self, nama='', no_hp='', alamat=''):
-        super().__init__()          # Constructor memanggil parent
+        super().__init__()          
         self.__nama   = nama
         self.__no_hp  = no_hp
         self.__alamat = alamat
@@ -42,10 +38,10 @@ class Pelanggan(BaseModel):
     @property
     def alamat(self): return self.__alamat
 
-    def to_dict(self):              # Polymorphism: override to_dict
+    def to_dict(self):             
         return {'nama': self.__nama, 'no_hp': self.__no_hp, 'alamat': self.__alamat}
 
-    def count(self):                # Method: hitung total pelanggan
+    def count(self):              
         try:
             self._cursor.execute("SELECT COUNT(*) AS total FROM pelanggan")
             return self._cursor.fetchone()['total']
@@ -53,20 +49,19 @@ class Pelanggan(BaseModel):
             self._close()
 
 
-class Layanan(BaseModel):           # Inheritance dari BaseModel
+class Layanan(BaseModel):           
     def __init__(self, nama_layanan='', harga_per_kg=0, estimasi_hari=1):
         super().__init__()
         self.__nama_layanan  = nama_layanan
         self.__harga_per_kg  = float(harga_per_kg) if harga_per_kg else 0
         self.__estimasi_hari = int(estimasi_hari)   if estimasi_hari else 1
 
-    def to_dict(self):              # Polymorphism: override to_dict
+    def to_dict(self):             
         return {'nama_layanan': self.__nama_layanan,
                 'harga_per_kg': self.__harga_per_kg,
                 'estimasi_hari': self.__estimasi_hari}
 
     def hitung_harga(self, berat_kg):
-        """Method khusus: hitung total harga berdasarkan berat."""
         return self.__harga_per_kg * float(berat_kg)
 
     def count(self):
@@ -77,7 +72,7 @@ class Layanan(BaseModel):           # Inheritance dari BaseModel
             self._close()
 
 
-class Transaksi(BaseModel):         # Inheritance dari BaseModel
+class Transaksi(BaseModel):        
     def __init__(self, pelanggan_id=None, layanan_id=None,
                  berat_kg=0, tanggal_masuk='', user_id=None):
         super().__init__()
