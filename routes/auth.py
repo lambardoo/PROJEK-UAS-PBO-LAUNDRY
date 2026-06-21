@@ -298,7 +298,6 @@ def login_page():
 def login():
     var_email    = request.form.get('email')
     var_password = request.form.get('password')
-
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
     try:
@@ -337,7 +336,6 @@ def register():
         return redirect(url_for('auth.register_page'))
 
     hashed_pw = generate_password_hash(var_password)
-
     db     = get_db_connection()
     cursor = db.cursor()
     try:
@@ -401,7 +399,6 @@ def edit_user(id):
     var_nama = request.form.get('nama_lengkap')
     var_role = request.form.get('role')
     var_pass = request.form.get('password')
-
     db     = get_db_connection()
     cursor = db.cursor()
     try:
@@ -435,7 +432,6 @@ def hapus_user(id):
     if id == session.get('user_id'):
         flash('Tidak dapat menghapus akun yang sedang digunakan.', 'danger')
         return redirect(url_for('auth.users_page'))
-
     db     = get_db_connection()
     cursor = db.cursor()
     try:
@@ -445,7 +441,6 @@ def hapus_user(id):
     finally:
         cursor.close()
         db.close()
-
     return redirect(url_for('auth.users_page'))
 
 
@@ -813,7 +808,6 @@ def tambah():
 def detail(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("""
             SELECT t.*, p.nama AS nama_pelanggan, p.no_hp, p.alamat,
@@ -840,10 +834,8 @@ def ubah_status(id, status):
     if status not in status_valid:
         flash('Status tidak valid.', 'danger')
         return redirect(url_for('transaksi.index'))
-
     db     = get_db_connection()
     cursor = db.cursor()
-
     try:
         cursor.execute("UPDATE transaksi SET status=%s WHERE id=%s", (status, id))
         db.commit()
