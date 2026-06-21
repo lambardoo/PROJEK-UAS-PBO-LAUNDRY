@@ -65,3 +65,7 @@ INSERT INTO layanan (nama_layanan, harga_per_kg, estimasi_hari) VALUES
 INSERT INTO pelanggan (nama, no_hp, alamat) VALUES
 ('Budi Kemaren', '081234567890', 'Jl. Merdeka No. 10'),
 ('Siti Abadi',  '081298765432', 'Jl. Diponegoro No. 5');
+
+-- Data admin
+-- admin@laundry.com
+-- pw : admin123
