@@ -54,7 +54,6 @@ class BaseModel:
 
 class Pelanggan(BaseModel):
     table_name = 'pelanggan'
-
     def __init__(self, nama='', no_hp='', alamat='', id=None):
         super().__init__(id)            
         self.__nama   = nama            
@@ -193,7 +192,6 @@ class Layanan(BaseModel):
 
 class Transaksi(BaseModel):
     table_name = 'transaksi'
-
     def __init__(self, pelanggan_id=None, layanan_id=None, berat_kg=0,
                  total_harga=0, tanggal_masuk='', tanggal_estimasi='',
                  user_id=None, kode_transaksi='', id=None):
@@ -211,7 +209,6 @@ class Transaksi(BaseModel):
     def kode_transaksi(self): return self.__kode_transaksi
     @property
     def total_harga(self):    return self.__total_harga
-
     def to_dict(self):               
         return {'id': self._id,
                 'kode_transaksi': self.__kode_transaksi,
@@ -304,11 +301,9 @@ def login():
 
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM users WHERE email = %s", (var_email,))
         user = cursor.fetchone()
-
         if user and check_password_hash(user['password'], var_password):
             session['user_id']      = user['id']
             session['nama_lengkap'] = user['nama_lengkap']
@@ -319,7 +314,6 @@ def login():
 
         flash('Email atau password salah.', 'danger')
         return redirect(url_for('auth.login_page'))
-
     finally:
         cursor.close()
         db.close()
@@ -338,7 +332,6 @@ def register():
     var_email   = request.form.get('email')
     var_password = request.form.get('password')
     var_konfirm  = request.form.get('konfirmasi_password')
-
     if var_password != var_konfirm:
         flash('Konfirmasi password tidak cocok.', 'danger')
         return redirect(url_for('auth.register_page'))
@@ -347,18 +340,15 @@ def register():
 
     db     = get_db_connection()
     cursor = db.cursor()
-
     try:
         query = "INSERT INTO users (nama_lengkap, email, password) VALUES (%s, %s, %s)"
         cursor.execute(query, (var_nama, var_email, hashed_pw))
         db.commit()
         flash('Registrasi berhasil! Silakan login.', 'success')
         return redirect(url_for('auth.login_page'))
-
     except Exception as e:
         flash('Email sudah terdaftar atau terjadi kesalahan.', 'danger')
         return redirect(url_for('auth.register_page'))
-
     finally:
         cursor.close()
         db.close()
@@ -377,7 +367,6 @@ def logout():
 def users_page():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM users ORDER BY id ASC")
         data = cursor.fetchall()
@@ -393,7 +382,6 @@ def users_page():
 def edit_user_page(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
         user = cursor.fetchone()
@@ -416,7 +404,6 @@ def edit_user(id):
 
     db     = get_db_connection()
     cursor = db.cursor()
-
     try:
         if var_pass:
             hashed = generate_password_hash(var_pass)
@@ -436,7 +423,6 @@ def edit_user(id):
     except Exception as e:
         flash('Gagal memperbarui data user.', 'danger')
         return redirect(url_for('auth.users_page'))
-
     finally:
         cursor.close()
         db.close()
@@ -452,7 +438,6 @@ def hapus_user(id):
 
     db     = get_db_connection()
     cursor = db.cursor()
-
     try:
         cursor.execute("DELETE FROM users WHERE id = %s", (id,))
         db.commit()
@@ -475,10 +460,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def index():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
-        # Menggunakan method count() dari class OOP (BaseModel.count, di-inherit
-        # oleh Pelanggan, Layanan, Transaksi) alih-alih query manual berulang.
         total_pelanggan  = Pelanggan.count()
         total_layanan    = Layanan.count()
         total_transaksi  = Transaksi.count()
@@ -517,10 +499,7 @@ def index():
         """)
         transaksi_terbaru = cursor.fetchall()
 
-        # ── Demonstrasi POLYMORPHISM ──────────────────────────────────────
-        # Tiga object dari class berbeda (semua turunan BaseModel) disimpan
-        # dalam satu list, lalu dipanggil method info() yang sama namanya
-        # tapi hasilnya berbeda-beda tergantung class objectnya masing-masing.
+
         objek_terbaru = []
         if transaksi_terbaru:
             t = transaksi_terbaru[0]
@@ -563,7 +542,6 @@ def index():
     keyword = request.args.get('q', '')
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         if keyword:
             cursor.execute(
@@ -593,9 +571,7 @@ def tambah():
     var_hp     = request.form.get('no_hp')
     var_alamat = request.form.get('alamat')
 
-    # Membuat object Pelanggan lalu memanggil method save() miliknya sendiri
     objek_pelanggan = Pelanggan(nama=var_nama, no_hp=var_hp, alamat=var_alamat)
-
     if objek_pelanggan.save():
         flash('Data pelanggan berhasil ditambahkan.', 'success')
     else:
@@ -609,7 +585,6 @@ def tambah():
 def edit_page(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM pelanggan WHERE id = %s", (id,))
         data = cursor.fetchone()
@@ -629,9 +604,8 @@ def edit(id):
     var_hp     = request.form.get('no_hp')
     var_alamat = request.form.get('alamat')
 
-    # Object Pelanggan dengan id yang sudah ada, lalu panggil method update()
-    objek_pelanggan = Pelanggan(nama=var_nama, no_hp=var_hp, alamat=var_alamat, id=id)
 
+    objek_pelanggan = Pelanggan(nama=var_nama, no_hp=var_hp, alamat=var_alamat, id=id)
     if objek_pelanggan.update():
         flash('Data pelanggan berhasil diperbarui.', 'success')
     else:
@@ -643,7 +617,6 @@ def edit(id):
 @pelanggan_bp.route('/pelanggan/hapus/<int:id>')
 @login_required
 def hapus(id):
-    # Method delete() diwarisi dari BaseModel, dipakai lewat Pelanggan.delete()
     if Pelanggan.delete(id):
         flash('Data pelanggan berhasil dihapus.', 'success')
     else:
@@ -664,7 +637,6 @@ layanan_bp = Blueprint('layanan', __name__)
 def index():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM layanan ORDER BY nama_layanan ASC")
         data = cursor.fetchall()
@@ -689,7 +661,6 @@ def tambah():
     var_hari  = request.form.get('estimasi_hari')
 
     objek_layanan = Layanan(nama_layanan=var_nama, harga_per_kg=var_harga, estimasi_hari=var_hari)
-
     if objek_layanan.save():
         flash('Data layanan berhasil ditambahkan.', 'success')
     else:
@@ -704,7 +675,6 @@ def tambah():
 def edit_page(id):
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM layanan WHERE id = %s", (id,))
         data = cursor.fetchone()
@@ -726,7 +696,6 @@ def edit(id):
 
     objek_layanan = Layanan(nama_layanan=var_nama, harga_per_kg=var_harga,
                              estimasi_hari=var_hari, id=id)
-
     if objek_layanan.update():
         flash('Data layanan berhasil diperbarui.', 'success')
     else:
@@ -757,7 +726,6 @@ transaksi_bp = Blueprint('transaksi', __name__)
 def index():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("""
             SELECT t.*, p.nama AS nama_pelanggan, l.nama_layanan,
@@ -780,7 +748,6 @@ def index():
 def tambah_page():
     db     = get_db_connection()
     cursor = db.cursor(dictionary=True)
-
     try:
         cursor.execute("SELECT * FROM pelanggan ORDER BY nama ASC")
         daftar_pelanggan = cursor.fetchall()
@@ -808,21 +775,17 @@ def tambah():
     var_user      = session['user_id']
 
     try:
-        # Ambil object Layanan dari database (classmethod get_by_id)
         objek_layanan = Layanan.get_by_id(var_layanan)
         if not objek_layanan:
             flash('Layanan tidak ditemukan.', 'danger')
             return redirect(url_for('transaksi.tambah_page'))
 
-        # Method milik object Layanan dipakai untuk menghitung harga & estimasi
+  
         total_harga  = objek_layanan.hitung_harga(var_berat)
         tgl_masuk    = datetime.strptime(var_tgl_masuk, '%Y-%m-%d')
         tgl_estimasi = objek_layanan.hitung_estimasi_selesai(tgl_masuk)
-
-        # Static method milik class Transaksi untuk generate kode otomatis
         kode = Transaksi.generate_kode()
 
-        # Membuat object Transaksi lalu menyimpannya lewat method save() miliknya
         objek_transaksi = Transaksi(
             pelanggan_id     = var_pelanggan,
             layanan_id       = var_layanan,
